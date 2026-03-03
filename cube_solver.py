@@ -1,7 +1,12 @@
 import cv2
 import numpy as np
+import kociemba
+from algo import solve_cube
 
-FACE_ORDER = ["F", "R", "B", "L", "U", "D"]
+
+
+
+FACE_ORDER = ["U", "R", "F", "D", "L", "B"]
 
 # cube data (6 faces × 9 cells)
 cube_data = []
@@ -11,20 +16,21 @@ cube_data = []
 def classify_color(hsv):
     h, s, v = hsv
 
-    if v > 180 and s < 40:
-        return 'w'   # white
-    if h < 10 or h > 160:
+    if s < 60 and v > 150:
+        return 'w'
+    if h < 10 or h > 170:
         return 'r'
-    if 10 < h < 25:
+    if 10 <= h < 25:
         return 'o'
-    if 25 < h < 40:
+    if 25 <= h < 40:
         return 'y'
-    if 40 < h < 85:
+    if 40 <= h < 85:
         return 'g'
-    if 85 < h < 140:
+    if 90 <= h < 130:
         return 'b'
 
     return '?'  #if unknown
+#____________________________________________________________________________________________________________________________________________________________________________________________
 
 
 
@@ -70,6 +76,7 @@ def read_face(frame):
 
 
 
+#____________________________________________________________________________________________________________________________________________________________________________________________
 
 
 def draw_grid(frame, face_name):
@@ -110,6 +117,7 @@ def draw_grid(frame, face_name):
 
 
 
+#____________________________________________________________________________________________________________________________________________________________________________________________
 
 
 
@@ -131,7 +139,7 @@ def main():
         if not ret:
             break
 
-       #frame = cv2.flip(frame,1)
+        frame = cv2.flip(frame,1)
 
         if capturing and face_index < 6:
             draw_grid(frame, FACE_ORDER[face_index]) 
@@ -156,6 +164,8 @@ def main():
             face_index += 1
 
             if face_index == 6:
+                # pass collected data into the solver function defined in algo.py
+                solve_cube(cube_data, FACE_ORDER)
                 break
 
         # exit
@@ -165,25 +175,38 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
 
-    print("\nFINAL CUBE DATA:\n")
-    print_cube()
+    
 
+#____________________________________________________________________________________________________________________________________________________________________________________________
+# def solve_cube():
+#     if len(cube_data) != 6:
+#         print("Incomplete cube data")
+#         return
 
+#     # Step 1: Determine color-to-face mapping from centers
+#     color_to_face = {}
 
+#     for i in range(6):
+#         center_color = cube_data[i][4]  # middle of 3x3
+#         color_to_face[center_color] = FACE_ORDER[i]
 
-#  PRINT RESULT
-def print_cube():
+#     # Step 2: Convert entire cube
+#     cube_string = ""
 
-    # convert faces into 3 rows output
-    rows = [[], [], []]
+#     for face in cube_data:
+#         for sticker in face:
+#             if sticker not in color_to_face:
+#                 print("Unknown color detected:", sticker)
+#                 return
+#             cube_string += color_to_face[sticker]
 
-    for face in cube_data:
-        rows[0].extend(face[0:3])  
-        rows[1].extend(face[3:6])
-        rows[2].extend(face[6:9])
+#     print("Cube String:", cube_string)
 
-    for r in rows:
-        print(" ".join(r))
+#     try:
+#         solution = kociemba.solve(cube_string)
+#         print("Solution:", solution)
+#     except Exception as e:
+#         print("Invalid cube state:", e)
 
 
 if __name__ == "__main__":
