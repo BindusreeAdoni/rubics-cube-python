@@ -18,9 +18,9 @@ def classify_color(hsv):
 
     if s < 60 and v > 150:
         return 'w'
-    if h < 10 or h > 170:
+    if (0 <= h < 4) or (170 <= h <= 179):
         return 'r'
-    if 10 <= h < 25:
+    if 4 <= h < 24:
         return 'o'
     if 25 <= h < 40:
         return 'y'
@@ -66,7 +66,6 @@ def read_face(frame):
             avg = np.mean(hsv.reshape(-1,3), axis=0) 
 
             # we get avg values of h,s,v and that is sent to classify_color() for getting eact color   
-
             color = classify_color(avg)
             face_colors.append(color)
 
@@ -125,7 +124,7 @@ def draw_grid(frame, face_name):
 #main func to capture frame first, generate grid and display,  
 def main():
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     print("Press 'c' to start cube capture")
 
@@ -139,7 +138,7 @@ def main():
         if not ret:
             break
 
-        frame = cv2.flip(frame,1)
+        #frame = cv2.flip(frame,1)
 
         if capturing and face_index < 6:
             draw_grid(frame, FACE_ORDER[face_index]) 
@@ -155,7 +154,7 @@ def main():
             print("Capture started")
 
         # capture face
-        if key == 32 and capturing:  # while capturing- true, if space entered, the picture is captured. 
+        if key == 32 and capturing and face_index < 6:  # while capturing- true, if space entered, the picture is captured. 
             colors = read_face(frame)  #9 cells colors of one face is returned in 1d array format
             cube_data.append(colors)
 
@@ -167,6 +166,17 @@ def main():
                 # pass collected data into the solver function defined in algo.py
                 solve_cube(cube_data, FACE_ORDER)
                 break
+
+
+        # if wrong data captured - press z to go back. 
+        if key == ord('z') and capturing:
+            if face_index > 0:
+                face_index -= 1
+                removed_face = cube_data.pop()
+                print(f"Removed Face {FACE_ORDER[face_index]}:", removed_face)
+                print("Retake this face.")
+            else:
+                print("No face to remove.")
 
         # exit
         if key == 27:
