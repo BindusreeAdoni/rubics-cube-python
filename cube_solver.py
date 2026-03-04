@@ -105,11 +105,21 @@ def draw_grid(frame, face_name):
                  (start_x+size, start_y+i*cell),
                  (0,255,0),2)
 
-    cv2.putText(frame,
-                f"Show Face: {face_name}",
-                (30,40),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,(0,255,0),2)
+        cv2.putText(frame,    # main text of face
+                    f"Show Face: {face_name}",
+                    (30, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1,
+                    (0, 255, 0),
+                    2)
+
+        cv2.putText(frame,              # instrucctions.
+                    "Press SPACE to capture | Z to retake | R to reset",
+                    (30, 75),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (255,255,255),
+                    1)
     
     # puttext(frame, text, starting point, fontfamily, size, color, thickness)
 
@@ -138,7 +148,7 @@ def main():
         if not ret:
             break
 
-        #frame = cv2.flip(frame,1)
+        #frame = cv2.flip(frame,1)               cv2.flip removed as moved from pc webcam to mobile cam.
 
         if capturing and face_index < 6:
             draw_grid(frame, FACE_ORDER[face_index]) 
@@ -178,6 +188,12 @@ def main():
             else:
                 print("No face to remove.")
 
+        if key == ord('r') and capturing:
+            face_index = 0
+            cube_data.clear()
+            capturing = False
+            print("Reset done. press 'c' to start capturing again")
+
         # exit
         if key == 27:
             break
@@ -186,38 +202,6 @@ def main():
     cv2.destroyAllWindows()
 
     
-
 #____________________________________________________________________________________________________________________________________________________________________________________________
-# def solve_cube():
-#     if len(cube_data) != 6:
-#         print("Incomplete cube data")
-#         return
-
-#     # Step 1: Determine color-to-face mapping from centers
-#     color_to_face = {}
-
-#     for i in range(6):
-#         center_color = cube_data[i][4]  # middle of 3x3
-#         color_to_face[center_color] = FACE_ORDER[i]
-
-#     # Step 2: Convert entire cube
-#     cube_string = ""
-
-#     for face in cube_data:
-#         for sticker in face:
-#             if sticker not in color_to_face:
-#                 print("Unknown color detected:", sticker)
-#                 return
-#             cube_string += color_to_face[sticker]
-
-#     print("Cube String:", cube_string)
-
-#     try:
-#         solution = kociemba.solve(cube_string)
-#         print("Solution:", solution)
-#     except Exception as e:
-#         print("Invalid cube state:", e)
-
-
 if __name__ == "__main__":
     main()
